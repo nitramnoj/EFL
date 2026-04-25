@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Listening Gap Fill</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  max-width: 700px;
+  margin: 40px auto;
+  font-size: 22px;
+}
+
+h1 { font-size: 28px; }
+
+.row {
+  margin: 12px 0;
+}
+
+input {
+  font-size: 20px;
+  padding: 6px;
+  width: 300px;
+}
+
+button {
+  font-size: 18px;
+  margin: 10px 5px 0 0;
+  padding: 8px 12px;
+}
+
+#feedback {
+  margin-top: 20px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1 id="title"></h1>
+<p id="instructions"></p>
+
+<!-- ✅ Word bank added -->
+<div id="wordbank" style="margin-bottom:20px; font-weight:bold;"></div>
+
+<div id="questions"></div>
+
+<div>
+  <button onclick="checkAnswers()">Check</button>
+  <button onclick="showAnswers()">Show Answers</button>
+  <button onclick="resetActivity()">Reset</button>
+</div>
+
+<div id="feedback"></div>
+
+<script>
+var activityData = null;
+
+function loadQuestions() {
+  document.getElementById("title").innerText = activityData.title;
+  document.getElementById("instructions").innerText = activityData.instructions;
+
+  // ✅ Build word bank
+  let words = activityData.items.map(item => item.answer);
+  words.sort(() => Math.random() - 0.5);
+  document.getElementById("wordbank").innerText =
+    "Word Bank: " + words.join(" | ");
+
+  let html = "";
+  activityData.items.forEach((item, index) => {
+    html += `
+      <div class="row">
+        ${item.question} <input id="q${index}" type="text">
+      </div>
+    `;
+  });
+
+  document.getElementById("questions").innerHTML = html;
+}
+
+function checkAnswers() {
+  let correct = 0;
+
+  activityData.items.forEach((item, index) => {
+    const val = document.getElementById("q" + index).value.trim().toLowerCase();
+    const answer = item.answer.toLowerCase();
+
+    if (val && answer.includes(val)) {
+      correct++;
+    }
+  });
+
+  document.getElementById("feedback").innerText =
+    "You got " + correct + " / " + activityData.items.length;
+}
+
+function showAnswers() {
+  activityData.items.forEach((item, index) => {
+    document.getElementById("q" + index).value = item.answer;
+  });
+  document.getElementById("feedback").innerText = "Answers shown";
+}
+
+function resetActivity() {
+  activityData.items.forEach((item, index) => {
+    document.getElementById("q" + index).value = "";
+  });
+  document.getElementById("feedback").innerText = "";
+}
+
+function loadActivityScript() {
+  const htmlFile = window.location.href.split("/").pop().split("?")[0].split("#")[0];
+  const jsFile = decodeURIComponent(htmlFile).replace(/\.html?$/i, ".js");
+
+  const script = document.createElement("script");
+  script.src = encodeURI(jsFile);
+
+  script.onload = () => {
+    if (!activityData || !activityData.items) {
+      alert("Invalid activity data");
+      return;
+    }
+
+    if (typeof loadQuestions === "function") {
+      loadQuestions();
+    }
+
+    if (typeof loadQuestion === "function") {
+      loadQuestion();
+    }
+  };
+
+  script.onerror = () => {
+    alert("Could not load " + jsFile);
+  };
+
+  document.body.appendChild(script);
+}
+
+loadActivityScript();
+
+</script>
+
+</body>
+</html>
