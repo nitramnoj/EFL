@@ -10,7 +10,7 @@ window.activityData = {
       hint: "Use present simple for routines."
     },
     {
-      parts: ["These days more people ", " at home."],
+      parts: ["These days more people are ", " at home."],
       options: ["cook", "cooking"],
       answer: "are cooking",
       hint: "Use present continuous for changing trends nowadays."
