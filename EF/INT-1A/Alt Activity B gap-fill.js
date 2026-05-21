@@ -12,7 +12,7 @@ window.activityData = {
     {
       parts: ["These days more people are ", " at home."],
       options: ["cook", "cooking"],
-      answer: "are cooking",
+      answer: "cooking",
       hint: "Use present continuous for changing trends nowadays."
     },
     {
