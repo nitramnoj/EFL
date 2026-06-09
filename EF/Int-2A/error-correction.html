@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TEMPLATE - Error Correction</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  max-width: 700px;
+  margin: 40px auto;
+  font-size: 22px;
+}
+
+h1 { font-size: 28px; }
+
+#question {
+  margin: 30px 0;
+  font-size: 24px;
+}
+
+button {
+  font-size: 18px;
+  margin: 5px;
+  padding: 8px 12px;
+}
+
+#feedback {
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+#hint {
+  margin-top: 10px;
+  color: #555;
+}
+
+#answer {
+  margin-top: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<h1 id="title"></h1>
+<p id="instructions"></p>
+<p id="counter"></p>
+
+<div id="question"></div>
+
+<div style="margin-top:20px;">
+  <input id="userAnswer" type="text" style="width:100%; font-size:20px; padding:6px;" placeholder="Type the corrected sentence here">
+</div>
+
+<div>
+  <button onclick="checkAnswer()">Check</button>
+  <button id="hintBtn" onclick="showHint()" style="display:none;">Hint</button>
+  <button id="answerBtn" onclick="showAnswer()" style="display:none;">Show Answer</button>
+</div>
+
+<div id="feedback"></div>
+<div id="hint"></div>
+<div id="answer"></div>
+
+<div style="margin-top:20px;">
+  <button onclick="prev()">Previous</button>
+  <button onclick="next()">Next</button>
+</div>
+
+<script>
+let current = 0;
+var activityData = null;
+
+function clean(text) {
+  return text
+    .toLowerCase()
+    .replace(/[.,!?]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function loadQuestion() {
+  const item = activityData.items[current];
+
+  document.getElementById("title").innerText = activityData.title;
+  document.getElementById("instructions").innerText = activityData.instructions;
+  document.getElementById("counter").innerText = (current + 1) + " / " + activityData.items.length;
+  document.getElementById("question").innerText = item.sentence;
+
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("hint").innerText = "";
+  document.getElementById("answer").innerText = "";
+  document.getElementById("userAnswer").value = "";
+  document.getElementById("hintBtn").style.display = "none";
+  document.getElementById("answerBtn").style.display = "none";
+}
+
+function checkAnswer() {
+  const item = activityData.items[current];
+  const user = clean(document.getElementById("userAnswer").value);
+  const correct = clean(item.answer);
+
+  if (!user) return;
+
+  if (user === correct) {
+    document.getElementById("feedback").innerText = "Correct";
+  } else {
+    document.getElementById("feedback").innerText = "Try again";
+    if (item.hint) {
+      document.getElementById("hintBtn").style.display = "inline-block";
+    } else {
+      document.getElementById("answerBtn").style.display = "inline-block";
+    }
+  }
+}
+
+function showHint() {
+  const item = activityData.items[current];
+  document.getElementById("hint").innerText = item.hint;
+  document.getElementById("answerBtn").style.display = "inline-block";
+}
+
+function showAnswer() {
+  const item = activityData.items[current];
+  document.getElementById("answer").innerText = item.answer;
+  document.getElementById("userAnswer").value = item.answer;
+  document.getElementById("feedback").innerText = "Answer shown";
+}
+
+function next() {
+  if (current < activityData.items.length - 1) {
+    current++;
+    loadQuestion();
+  } else {
+    showComplete();
+  }
+}
+
+function prev() {
+  if (current > 0) {
+    current--;
+    loadQuestion();
+  }
+}
+
+function showComplete() {
+  document.getElementById("question").innerText = "Completed";
+  document.getElementById("counter").innerText = "";
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("hint").innerText = "";
+  document.getElementById("answer").innerText = "";
+  document.getElementById("userAnswer").value = "";
+  document.getElementById("hintBtn").style.display = "none";
+  document.getElementById("answerBtn").style.display = "none";
+}
+
+function loadActivityScript() {
+  const htmlFile = window.location.href.split("/").pop().split("?")[0].split("#")[0];
+  const jsFile = decodeURIComponent(htmlFile).replace(/\.html?$/i, ".js");
+
+  const script = document.createElement("script");
+  script.src = encodeURI(jsFile);
+
+  script.onload = () => {
+    if (!activityData || !activityData.items) {
+      alert("Invalid activity data");
+      return;
+    }
+
+    if (typeof loadQuestions === "function") {
+      loadQuestions();
+    }
+
+    if (typeof loadQuestion === "function") {
+      loadQuestion();
+    }
+  };
+
+  script.onerror = () => {
+    alert("Could not load " + jsFile);
+  };
+
+  document.body.appendChild(script);
+}
+
+loadActivityScript();
+
+</script>
+
+</body>
+</html>
